@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gifts GG Mini App</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top User Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #141414;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: #00d285;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .user-details h4 {
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .user-details p {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .top-stats {
+            display: flex;
+            gap: 8px;
+        }
+
+        .stat-badge {
+            background: #222;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ticket-icon {
+            color: #ff6b00;
+        }
+
+        .diamond-icon {
+            color: #00aaff;
+        }
+
+        /* Main Content Container */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: none;
+            padding-bottom: 80px;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        /* --- HOME SECTION --- */
+        .event-card {
+            background: linear-gradient(135deg, #ff5e00, #ff9900);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .action-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-blue {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-purple {
+            background: #8a2be2;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: #ff5e00;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .task-info h5 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .task-info p {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .task-reward {
+            background: #2a2a2a;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #ffb700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* --- SPIN WHEEL SECTION --- */
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 20px;
+        }
+
+        .wheel-box {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            border: 5px solid #00aaff;
+            overflow: hidden;
+            transition: transform 3s cubic-bezier(0.15, 0.99, 0.18, 1);
+            background: conic-gradient(
+                #ff4757 0deg 45deg,
+                #ffa502 45deg 90deg,
+                #2ed573 90deg 135deg,
+                #1e90ff 135deg 180deg,
+                #3742fa 180deg 225deg,
+                #9b59b6 225deg 270deg,
+                #e84393 270deg 315deg,
+                #ff6b81 315deg 360deg
+            );
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.4);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: 10px;
+            z-index: 10;
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 20px solid #fff;
+        }
+
+        .wheel-center {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #111;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            border: 2px solid #fff;
+        }
+
+        .spin-btn {
+            margin-top: 30px;
+            width: 100%;
+            background: #007bff;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- WALLET SECTION --- */
+        .balance-card {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .balance-amount {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0 5px 0;
+            color: #00aaff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .balance-card p {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .history-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .history-card h5 {
+            margin-bottom: 10px;
+            color: #aaa;
+        }
+
+        .history-status {
+            color: #2ed573;
+            font-size: 12px;
+            float: right;
+            background: rgba(46, 213, 115, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* --- DAILY REWARD MODAL/CARD --- */
+        .daily-calendar {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .day-box {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 10px 5px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .day-box.active {
+            border-color: #8a2be2;
+            background: #2a1b3d;
+        }
+
+        .day-box p {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .day-box span {
+            display: block;
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 65px;
+            background: #141414;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #222;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            text-decoration: none;
+            font-size: 11px;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .nav-item i {
+            font-size: 18px;
+        }
+
+        .nav-item.active {
+            color: #ff5e00;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Top Bar Section -->
+    <div class="top-bar">
+        <div class="user-info">
+            <div class="avatar" id="user-avatar">U</div>
+            <div class="user-details">
+                <h4 id="user-name">ইউজার নাম</h4>
+                <p id="user-handle">@username</p>
+            </div>
+        </div>
+        <div class="top-stats">
+            <div class="stat-badge">
+                <i class="fa-solid fa-ticket ticket-icon"></i>
+                <span id="ticket-count">0</span>
+            </div>
+            <div class="stat-badge">
+                <i class="fa-solid fa-gem diamond-icon"></i>
+                <span id="diamond-count">1.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. HOME TAB -->
+    <div id="home-tab" class="content active">
+        <!-- Event Banner -->
+        <div class="event-card">
+            <h2>Event pool</h2>
+            <div class="action-btns">
+                <button class="btn-blue" onclick="switchTab('referral-tab')">
+                    <i class="fa-solid fa-user-plus"></i> Invite & Earn
+                </button>
+                <button class="btn-purple" onclick="switchTab('spin-tab')">
+                    <i class="fa-solid fa-arrows-spin"></i> Spin
+                </button>
+            </div>
+        </div>
+
+        <!-- Daily Reward Banner -->
+        <div style="background: #1a1a1a; padding: 15px; border-radius: 12px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4><i class="fa-solid fa-calendar-days" style="color: #8a2be2;"></i> Daily Reward</h4>
+                <span style="font-size: 12px; color: #00d285;">Day 3 Ready</span>
+            </div>
+            <div class="daily-calendar">
+                <div class="day-box"><p>1</p><i class="fa-solid fa-ticket ticket-icon"></i><span>1</span></div>
+                <div class="day-box"><p>2</p><i class="fa-solid fa-gem diamond-icon"></i><span>1</span></div>
+                <div class="day-box active"><p>3</p><i class="fa-solid fa-ticket ticket-icon"></i><span>1</span></div>
+                <div class="day-box"><p>4</p><i class="fa-solid fa-gem diamond-icon"></i><span>2</span></div>
+                <div class="day-box"><p>5</p><i class="fa-solid fa-gem diamond-icon"></i><span>10</span></div>
+            </div>
+        </div>
+
+        <!-- Hot Tasks -->
+        <div class="section-title">
+            <i class="fa-solid fa-fire"></i> HOT TASKS
+        </div>
+
+        <div class="task-card">
+            <div class="task-left">
+                <div class="task-icon"></div>
+                <div class="task-info">
+                    <h5>Join Gold Fest Season 2</h5>
+                    <p>Claim daily free XP...</p>
+                </div>
+            </div>
+            <div class="task-reward">+20k <i class="fa-solid fa-ticket ticket-icon"></i></div>
+        </div>
+
+        <div class="task-card">
+            <div class="task-left">
+                <div class="task-icon"></div>
+                <div class="task-info">
+                    <h5>Get 250 FS! No Deposit</h5>
+                    <p>ADVERTISEMENT</p>
+                </div>
+            </div>
+            <div class="task-reward">+15k <i class="fa-solid fa-ticket ticket-icon"></i></div>
+        </div>
+    </div>
+
+    <!-- 3. SPIN WHEEL TAB -->
+    <div id="spin-tab" class="content">
+        <h3 style="text-align: center; margin-bottom: 20px;">Spin & Win</h3>
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <div class="wheel-box" id="wheel">
+                <div class="wheel-center">gifts.gg</div>
+            </div>
+            <button class="spin-btn" onclick="spinWheel()">Free Spin</button>
+        </div>
+    </div>
+
+    <!-- 4. REFERRAL TAB -->
+    <div id="referral-tab" class="content">
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 16px; text-align: center;">
+            <h3>INVITE FRIENDS, GET REWARDS</h3>
+            <p style="font-size: 12px; color: #888; margin: 10px 0 20px 0;">আপনার রেফারেল লিংক শেয়ার করে ডায়মন্ড এবং টিকিট আয় করুন।</p>
+            
+            <div style="background: #111; padding: 12px; border-radius: 8px; font-size: 11px; word-break: break-all; color: #00aaff; margin-bottom: 15px;">
+                https://t.me/gamee/start?startapp=ref123456
+            </div>
+            
+            <button class="btn-blue" style="width: 100%;" onclick="copyRefLink()">
+                <i class="fa-solid fa-copy"></i> SEND INVITE GIFT
+            </button>
+        </div>
+
+        <div class="section-title" style="margin-top: 20px;">Referral History</div>
+        <div class="task-card">
+            <div class="task-left">
+                <div class="avatar" style="background:#00aaff;">R</div>
+                <div class="task-info">
+                    <h5>Rahin@giftsggapp</h5>
+                </div>
+            </div>
+            <div class="task-reward">+1 <i class="fa-solid fa-ticket ticket-icon"></i></div>
+        </div>
+    </div>
+
+    <!-- 5. WALLET TAB -->
+    <div id="wallet-tab" class="content">
+        <div class="balance-card">
+            <p>Your Balance</p>
+            <div class="balance-amount">
+                <i class="fa-solid fa-gem"></i> 1.00
+            </div>
+            <p>~$1.21 USD</p>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-blue" style="flex: 1;"><i class="fa-solid fa-arrow-down"></i> Withdraw</button>
+                <button class="btn-purple" style="flex: 1;"><i class="fa-solid fa-rotate"></i> Convert</button>
+            </div>
+        </div>
+
+        <div class="history-card">
+            <h5>Withdrawal History</h5>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div>
+                    <strong><i class="fa-solid fa-gem diamond-icon"></i> 31</strong>
+                    <span style="font-size: 11px; color: #888;">(~$37.51)</span>
+                </div>
+                <span class="history-status">Processed</span>
+            </div>
+            <p style="font-size: 11px; color: #777;">
+                This balance has been processed into your casino balance.
+            </p>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home-tab', this)">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('spin-tab', this)">
+            <i class="fa-solid fa-gamepad"></i>
+            <span>Play</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('wallet-tab', this)">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Wallet</span>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp SDK
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) {
+            tg.expand(); // Full screen inside Telegram
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const user = tg.initDataUnsafe.user;
+                document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                document.getElementById('user-handle').innerText = user.username ? '@' + user.username : '';
+                document.getElementById('user-avatar').innerText = user.first_name.charAt(0);
+            }
+        }
+
+        // Tab Switch Logic
+        function switchTab(tabId, navElement) {
+            document.querySelectorAll('.content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+
+            if (navElement) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                navElement.classList.add('active');
+            }
+        }
+
+        // Spin Wheel Logic
+        let currentRotation = 0;
+        function spinWheel() {
+            const wheel = document.getElementById('wheel');
+            const randomDegrees = Math.floor(Math.random() * 360) + 1440; // At least 4 full spins
+            currentRotation += randomDegrees;
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+        }
+
+        // Copy Referral Link
+        function copyRefLink() {
+            const link = "https://t.me/gamee/start?startapp=ref123456";
+            navigator.clipboard.writeText(link);
+            alert("Referral link copied!");
+        }
+    </script>
+</body>
+</html>
+
